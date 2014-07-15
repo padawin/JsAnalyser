@@ -68,7 +68,9 @@ class Parser
 				this.compareState(this.IN_STRING) && !this.compareState(this.ESCAPED_CHAR)
 				&& c == this.currentStringDelimiter
 			) {
-				this.strings.put(this.currentString, 1);
+				Integer stringOccurences = this.strings.get(this.currentString);
+				stringOccurences = stringOccurences != null ? stringOccurences: 0;
+				this.strings.put(this.currentString, stringOccurences + 1);
 				this.currentStringDelimiter = '\0';
 				this.enableState(this.STRING_END);
 				this.disableState(this.IN_STRING);
@@ -109,7 +111,7 @@ class Parser
 		if (nbStrings > 0) {
 			System.out.println("Strings:");
 			for (String currentString : this.strings.keySet()) {
-				System.out.println(currentString);
+				System.out.println(currentString + ": " + this.strings.get(currentString) + " occurences");
 			}
 		}
 	}
