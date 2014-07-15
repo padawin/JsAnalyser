@@ -39,6 +39,11 @@ class Parser
 		}
 	}
 
+	protected boolean inComment()
+	{
+		return this.compareState(this.IN_BLOCK_COMMENT) || this.compareState(this.IN_INLINE_COMMENT);
+	}
+
 	protected boolean compareState(final int flag)
 	{
 		return (1 << flag) == (this.state & (1 << flag));
