@@ -1,0 +1,3 @@
+# JsAnalyser
+
+A javascript analyser to find optimisable code...
