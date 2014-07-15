@@ -9,6 +9,10 @@ class Parser
 	protected final int ESCAPED_CHAR = 1;
 	protected final int STRING_START = 2;
 	protected final int STRING_END = 3;
+	protected final int MAYBE_START_COMMENT = 4;
+	protected final int MAYBE_END_BLOCK_COMMENT = 5;
+	protected final int IN_INLINE_COMMENT = 6;
+	protected final int IN_BLOCK_COMMENT = 7;
 
 	protected char currentStringDelimiter;
 	protected String currentString;
@@ -23,8 +27,7 @@ class Parser
 	public void startParsing()
 	{
 		this.parsing = true;
-		this.currentCharIndex = this.state = 0;
-		this.strings = new HashMap<String, Integer>();
+		this.reset();
 	}
 
 	public void parseCodeChunk(String chunk)
@@ -34,6 +37,11 @@ class Parser
 		for (localCurChar = 0; localCurChar < chunkSize; localCurChar++, this.currentCharIndex++) {
 			this.parseChar(chunk.charAt(localCurChar));
 		}
+	}
+
+	protected boolean inComment()
+	{
+		return this.compareState(this.IN_BLOCK_COMMENT) || this.compareState(this.IN_INLINE_COMMENT);
 	}
 
 	protected boolean compareState(final int flag)
@@ -53,6 +61,12 @@ class Parser
 
 	protected void parseChar(final char c)
 	{
+		this.parseComments(c);
+
+		if (this.inComment()) {
+			return;
+		}
+
 		if (c == '\\' && !this.compareState(this.ESCAPED_CHAR)) {
 			this.enableState(this.ESCAPED_CHAR);
 		}
@@ -92,6 +106,42 @@ class Parser
 		}
 	}
 
+	protected void parseComments(final char c)
+	{
+		if (c == '/') {
+			if (!this.compareState(this.IN_INLINE_COMMENT)
+				&& !this.compareState(this.IN_BLOCK_COMMENT)
+				&& !this.compareState(this.MAYBE_START_COMMENT)
+			) {
+				this.enableState(this.MAYBE_START_COMMENT);
+			}
+			else if (this.compareState(this.MAYBE_START_COMMENT)) {
+				this.disableState(this.MAYBE_START_COMMENT);
+				this.enableState(this.IN_INLINE_COMMENT);
+			}
+			else if (this.compareState(this.MAYBE_END_BLOCK_COMMENT)) {
+				this.disableState(this.MAYBE_END_BLOCK_COMMENT);
+				this.disableState(this.IN_BLOCK_COMMENT);
+			}
+		}
+		else if (this.compareState(this.MAYBE_END_BLOCK_COMMENT)) {
+			this.disableState(this.MAYBE_END_BLOCK_COMMENT);
+		}
+
+		if (c == '*') {
+			if (this.compareState(this.MAYBE_START_COMMENT)) {
+				this.disableState(this.MAYBE_START_COMMENT);
+				this.enableState(this.IN_BLOCK_COMMENT);
+			}
+			else if (this.compareState(this.IN_BLOCK_COMMENT)) {
+				this.enableState(this.MAYBE_END_BLOCK_COMMENT);
+			}
+		}
+		else if (c == '\n' && this.compareState(this.IN_INLINE_COMMENT)) {
+			this.disableState(this.IN_INLINE_COMMENT);
+		}
+	}
+
 	public void endParsing()
 	{
 		this.parsing = false;
@@ -100,19 +150,14 @@ class Parser
 
 	protected void reset()
 	{
-		this.currentCharIndex = -1;
-		this.state = -1;
+		this.currentCharIndex = this.state = 0;
+		this.strings = new HashMap<String, Integer>();
 	}
 
 	public void printReport()
 	{
 		System.out.println("Report");
-		int nbStrings = this.strings.size();
-		if (nbStrings > 0) {
-			System.out.println("Strings:");
-			for (String currentString : this.strings.keySet()) {
-				System.out.println(currentString + ": " + this.strings.get(currentString) + " occurences");
-			}
-		}
+		StringAnalyser stringAnalyser = new StringAnalyser(this.strings);
+		stringAnalyser.run(true);
 	}
 }

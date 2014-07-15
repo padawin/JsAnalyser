@@ -15,10 +15,10 @@ public class Analyser
 			parser.startParsing();
 			String input;
 			while ((input=br.readLine()) != null){
-				parser.parseCodeChunk(input);
+				parser.parseCodeChunk(input + '\n');
 			}
-			parser.endParsing();
 			parser.printReport();
+			parser.endParsing();
 
 		} catch (IOException io) {
 			io.printStackTrace();
