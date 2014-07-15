@@ -1,6 +1,8 @@
 package analyser;
 
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 public class StringAnalyser
 {
@@ -22,7 +24,9 @@ public class StringAnalyser
 		if (nbStrings > 0) {
 			System.out.println();
 			System.out.println("Strings:");
-			for (String currentString : this.strings.keySet()) {
+			List<String> list = new ArrayList<String>(this.strings.keySet());
+			java.util.Collections.sort(list);
+			for (String currentString : list) {
 				int strLength = currentString.length(),
 					nbOccurences = this.strings.get(currentString),
 					relationLenOccurences = (strLength + 1) * nbOccurences - strLength;
