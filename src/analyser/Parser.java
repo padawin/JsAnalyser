@@ -9,6 +9,10 @@ class Parser
 	protected final int ESCAPED_CHAR = 1;
 	protected final int STRING_START = 2;
 	protected final int STRING_END = 3;
+	protected final int MAYBE_START_COMMENT = 4;
+	protected final int MAYBE_END_BLOCK_COMMENT = 5;
+	protected final int IN_INLINE_COMMENT = 6;
+	protected final int IN_BLOCK_COMMENT = 7;
 
 	protected char currentStringDelimiter;
 	protected String currentString;
