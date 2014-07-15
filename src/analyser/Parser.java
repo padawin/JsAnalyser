@@ -104,5 +104,12 @@ class Parser
 	public void printReport()
 	{
 		System.out.println("Report");
+		int nbStrings = this.strings.size();
+		if (nbStrings > 0) {
+			System.out.println("Strings:");
+			for (String currentString : this.strings) {
+				System.out.println(currentString);
+			}
+		}
 	}
 }
