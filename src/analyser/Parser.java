@@ -106,12 +106,7 @@ class Parser
 	public void printReport()
 	{
 		System.out.println("Report");
-		int nbStrings = this.strings.size();
-		if (nbStrings > 0) {
-			System.out.println("Strings:");
-			for (String currentString : this.strings.keySet()) {
-				System.out.println(currentString + ": " + this.strings.get(currentString) + " occurences");
-			}
-		}
+		StringAnalyser stringAnalyser = new StringAnalyser(this.strings);
+		stringAnalyser.run(true);
 	}
 }
