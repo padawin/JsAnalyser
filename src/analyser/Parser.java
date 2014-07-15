@@ -61,6 +61,41 @@ class Parser
 
 	protected void parseChar(final char c)
 	{
+		/* Comment parsing start */
+		if (c == '/') {
+			if (!this.compareState(this.IN_INLINE_COMMENT)
+				&& !this.compareState(this.IN_BLOCK_COMMENT)
+				&& !this.compareState(this.MAYBE_START_COMMENT)
+			) {
+				this.enableState(this.MAYBE_START_COMMENT);
+			}
+			else if (this.compareState(this.MAYBE_START_COMMENT)) {
+				this.disableState(this.MAYBE_START_COMMENT);
+				this.enableState(this.IN_INLINE_COMMENT);
+			}
+			else if (this.compareState(this.MAYBE_END_BLOCK_COMMENT)) {
+				this.disableState(this.MAYBE_END_BLOCK_COMMENT);
+				this.disableState(this.IN_BLOCK_COMMENT);
+			}
+		}
+		else if (this.compareState(this.MAYBE_END_BLOCK_COMMENT)) {
+			this.disableState(this.MAYBE_END_BLOCK_COMMENT);
+		}
+
+		if (c == '*') {
+			if (this.compareState(this.MAYBE_START_COMMENT)) {
+				this.disableState(this.MAYBE_START_COMMENT);
+				this.enableState(this.IN_BLOCK_COMMENT);
+			}
+			else if (this.compareState(this.IN_BLOCK_COMMENT)) {
+				this.enableState(this.MAYBE_END_BLOCK_COMMENT);
+			}
+		}
+		else if (c == '\n' && this.compareState(this.IN_INLINE_COMMENT)) {
+			this.disableState(this.IN_INLINE_COMMENT);
+		}
+		/* Comment parsing end */
+
 		if (c == '\\' && !this.compareState(this.ESCAPED_CHAR) && !this.inComment()) {
 			this.enableState(this.ESCAPED_CHAR);
 		}
