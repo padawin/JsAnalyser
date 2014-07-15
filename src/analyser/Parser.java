@@ -61,11 +61,11 @@ class Parser
 
 	protected void parseChar(final char c)
 	{
-		if (c == '\\' && !this.compareState(this.ESCAPED_CHAR)) {
+		if (c == '\\' && !this.compareState(this.ESCAPED_CHAR) && !this.inComment()) {
 			this.enableState(this.ESCAPED_CHAR);
 		}
 		else {
-			if ((c == '"' || c == '\'') && !this.compareState(this.IN_STRING)) {
+			if ((c == '"' || c == '\'') && !this.compareState(this.IN_STRING) && !this.inComment()) {
 				this.currentStringDelimiter = c;
 				this.enableState(this.STRING_START);
 				this.currentStringStartIndex = this.currentCharIndex;
@@ -74,6 +74,7 @@ class Parser
 			else if (
 				(c == '"' || c == '\'') &&
 				this.compareState(this.IN_STRING) && !this.compareState(this.ESCAPED_CHAR)
+				&& !this.inComment()
 				&& c == this.currentStringDelimiter
 			) {
 				Integer stringOccurences = this.strings.get(this.currentString);
