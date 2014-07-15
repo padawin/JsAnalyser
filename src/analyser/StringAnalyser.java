@@ -37,10 +37,13 @@ public class StringAnalyser
 				);
 
 				if (9 < relationLenOccurences) {
-					System.out.println("\tOptimisable with new var");
+					System.out.println("\tOptimisable");
 				}
-				if (5 < relationLenOccurences) {
+				else if (5 < relationLenOccurences) {
 					System.out.println("\tOptimisable with existing var");
+				}
+				else if (verbose) {
+					System.out.println("\tNon optimisable");
 				}
 			}
 		}
