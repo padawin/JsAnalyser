@@ -23,8 +23,7 @@ class Parser
 	public void startParsing()
 	{
 		this.parsing = true;
-		this.currentCharIndex = this.state = 0;
-		this.strings = new HashMap<String, Integer>();
+		this.reset();
 	}
 
 	public void parseCodeChunk(String chunk)
@@ -100,8 +99,8 @@ class Parser
 
 	protected void reset()
 	{
-		this.currentCharIndex = -1;
-		this.state = -1;
+		this.currentCharIndex = this.state = 0;
+		this.strings = new HashMap<String, Integer>();
 	}
 
 	public void printReport()
