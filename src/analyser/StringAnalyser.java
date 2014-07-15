@@ -30,7 +30,11 @@ public class StringAnalyser
 				int strLength = currentString.length(),
 					nbOccurences = this.strings.get(currentString),
 					relationLenOccurences = (strLength + 1) * nbOccurences - strLength;
-				System.out.println(currentString + ": " + nbOccurences + " occurences");
+
+				System.out.println(
+					(currentString == "" ? "(empty string)" : currentString) + ": "
+					+ nbOccurences + " occurence(s)"
+				);
 
 				if (9 < relationLenOccurences) {
 					System.out.println("\tOptimisable with new var");
