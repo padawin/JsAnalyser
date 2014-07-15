@@ -10,11 +10,15 @@ public class Analyser
 	{
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+			Parser parser = new Parser();
 
+			parser.startParsing();
 			String input;
 			while ((input=br.readLine()) != null){
-				System.out.println(input);
+				parser.parseCodeChunk(input);
 			}
+			parser.endParsing();
+			parser.printReport();
 
 		} catch (IOException io) {
 			io.printStackTrace();
