@@ -63,11 +63,15 @@ class Parser
 	{
 		this.parseComments(c);
 
-		if (c == '\\' && !this.compareState(this.ESCAPED_CHAR) && !this.inComment()) {
+		if (this.inComment()) {
+			return;
+		}
+
+		if (c == '\\' && !this.compareState(this.ESCAPED_CHAR)) {
 			this.enableState(this.ESCAPED_CHAR);
 		}
 		else {
-			if ((c == '"' || c == '\'') && !this.compareState(this.IN_STRING) && !this.inComment()) {
+			if ((c == '"' || c == '\'') && !this.compareState(this.IN_STRING)) {
 				this.currentStringDelimiter = c;
 				this.enableState(this.STRING_START);
 				this.currentStringStartIndex = this.currentCharIndex;
@@ -76,7 +80,6 @@ class Parser
 			else if (
 				(c == '"' || c == '\'') &&
 				this.compareState(this.IN_STRING) && !this.compareState(this.ESCAPED_CHAR)
-				&& !this.inComment()
 				&& c == this.currentStringDelimiter
 			) {
 				Integer stringOccurences = this.strings.get(this.currentString);
