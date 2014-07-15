@@ -1,6 +1,7 @@
 package analyser;
 
-import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 class Parser
 {
@@ -13,7 +14,7 @@ class Parser
 	protected String currentString;
 	protected int currentStringStartIndex;
 
-	protected ArrayList<String> strings;
+	protected Map<String, Integer> strings;
 
 	protected boolean parsing = false;
 	protected int currentCharIndex = -1;
@@ -23,7 +24,7 @@ class Parser
 	{
 		this.parsing = true;
 		this.currentCharIndex = this.state = 0;
-		this.strings = new ArrayList<String>();
+		this.strings = new HashMap<String, Integer>();
 	}
 
 	public void parseCodeChunk(String chunk)
@@ -67,7 +68,9 @@ class Parser
 				this.compareState(this.IN_STRING) && !this.compareState(this.ESCAPED_CHAR)
 				&& c == this.currentStringDelimiter
 			) {
-				this.strings.add(this.currentString);
+				Integer stringOccurences = this.strings.get(this.currentString);
+				stringOccurences = stringOccurences != null ? stringOccurences: 0;
+				this.strings.put(this.currentString, stringOccurences + 1);
 				this.currentStringDelimiter = '\0';
 				this.enableState(this.STRING_END);
 				this.disableState(this.IN_STRING);
@@ -107,8 +110,8 @@ class Parser
 		int nbStrings = this.strings.size();
 		if (nbStrings > 0) {
 			System.out.println("Strings:");
-			for (String currentString : this.strings) {
-				System.out.println(currentString);
+			for (String currentString : this.strings.keySet()) {
+				System.out.println(currentString + ": " + this.strings.get(currentString) + " occurences");
 			}
 		}
 	}
