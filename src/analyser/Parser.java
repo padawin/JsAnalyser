@@ -23,6 +23,7 @@ class Parser
 	protected boolean parsing = false;
 	protected int currentCharIndex = -1;
 	protected int state = -1;
+	protected int currentScopeLevel = 0;
 
 	public void startParsing()
 	{
@@ -78,6 +79,13 @@ class Parser
 
 		if (this.inString()) {
 			return;
+		}
+
+		if (c == '{') {
+			this.currentScopeLevel++;
+		}
+		else if (c == '}') {
+			this.currentScopeLevel--;
 		}
 	}
 
