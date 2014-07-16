@@ -76,6 +76,9 @@ class Parser
 
 		this.parseString(c);
 
+		if (this.inString()) {
+			return;
+		}
 	}
 
 	protected void parseComments(final char c)
