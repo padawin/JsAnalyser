@@ -220,6 +220,8 @@ class Parser
 	{
 		System.out.println("Report");
 		StringAnalyser stringAnalyser = new StringAnalyser(this.strings);
+		NumericAnalyser numericAnalyser = new NumericAnalyser(this.numerics);
 		stringAnalyser.run(true);
+		numericAnalyser.run(true);
 	}
 }
