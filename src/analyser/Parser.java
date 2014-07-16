@@ -2,6 +2,7 @@ package analyser;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 class Parser
 {
@@ -13,10 +14,14 @@ class Parser
 	protected final int MAYBE_END_BLOCK_COMMENT = 5;
 	protected final int IN_INLINE_COMMENT = 6;
 	protected final int IN_BLOCK_COMMENT = 7;
+	protected final int IN_NUMERIC = 8;
 
 	protected char currentStringDelimiter;
 	protected String currentString;
 	protected int currentStringStartIndex;
+
+	protected String currentNumeric;
+	protected Map<String, Integer> numerics;
 
 	protected Map<String, Integer> strings;
 
@@ -24,6 +29,9 @@ class Parser
 	protected int currentCharIndex = -1;
 	protected int state = -1;
 	protected int currentScopeLevel = 0;
+
+	protected Map<String, Integer> tokens;
+	protected String currentToken;
 
 	public void startParsing()
 	{
@@ -81,6 +89,12 @@ class Parser
 			return;
 		}
 
+		this.parseNumeric(c);
+
+		if (this.compareState(this.IN_NUMERIC)) {
+			return;
+		}
+
 		if (c == '{') {
 			this.currentScopeLevel++;
 		}
@@ -125,6 +139,26 @@ class Parser
 		}
 		else if (c == '\n' && this.compareState(this.IN_INLINE_COMMENT)) {
 			this.disableState(this.IN_INLINE_COMMENT);
+		}
+	}
+
+	protected void parseNumeric(final char c)
+	{
+		String sC = String.valueOf(c);
+		if (!this.compareState(this.IN_NUMERIC) && Pattern.matches("[0-9]", sC)) {
+			this.enableState(this.IN_NUMERIC);
+			this.currentNumeric = sC;
+		}
+		else if (this.compareState(this.IN_NUMERIC)) {
+			if (Pattern.matches("[.0-9]", sC)) {
+				this.currentNumeric = this.currentNumeric.concat(sC);
+			}
+			else {
+				Integer numericsOccurences = this.numerics.get(this.currentNumeric);
+				numericsOccurences = numericsOccurences != null ? numericsOccurences: 0;
+				this.numerics.put(this.currentNumeric, numericsOccurences + 1);
+				this.disableState(this.IN_NUMERIC);
+			}
 		}
 	}
 
@@ -179,6 +213,7 @@ class Parser
 	{
 		this.currentCharIndex = this.state = 0;
 		this.strings = new HashMap<String, Integer>();
+		this.numerics = new HashMap<String, Integer>();
 	}
 
 	public void printReport()
