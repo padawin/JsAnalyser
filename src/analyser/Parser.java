@@ -44,6 +44,13 @@ class Parser
 		return this.compareState(this.IN_BLOCK_COMMENT) || this.compareState(this.IN_INLINE_COMMENT);
 	}
 
+	protected boolean inString()
+	{
+		return this.compareState(this.STRING_START)
+			|| this.compareState(this.IN_STRING)
+			|| this.compareState(this.STRING_END);
+	}
+
 	protected boolean compareState(final int flag)
 	{
 		return (1 << flag) == (this.state & (1 << flag));
