@@ -44,6 +44,13 @@ class Parser
 		return this.compareState(this.IN_BLOCK_COMMENT) || this.compareState(this.IN_INLINE_COMMENT);
 	}
 
+	protected boolean inString()
+	{
+		return this.compareState(this.STRING_START)
+			|| this.compareState(this.IN_STRING)
+			|| this.compareState(this.STRING_END);
+	}
+
 	protected boolean compareState(final int flag)
 	{
 		return (1 << flag) == (this.state & (1 << flag));
@@ -67,42 +74,10 @@ class Parser
 			return;
 		}
 
-		if (c == '\\' && !this.compareState(this.ESCAPED_CHAR)) {
-			this.enableState(this.ESCAPED_CHAR);
-		}
-		else {
-			if ((c == '"' || c == '\'') && !this.compareState(this.IN_STRING)) {
-				this.currentStringDelimiter = c;
-				this.enableState(this.STRING_START);
-				this.currentStringStartIndex = this.currentCharIndex;
-				this.currentString = "";
-			}
-			else if (
-				(c == '"' || c == '\'') &&
-				this.compareState(this.IN_STRING) && !this.compareState(this.ESCAPED_CHAR)
-				&& c == this.currentStringDelimiter
-			) {
-				Integer stringOccurences = this.strings.get(this.currentString);
-				stringOccurences = stringOccurences != null ? stringOccurences: 0;
-				this.strings.put(this.currentString, stringOccurences + 1);
-				this.currentStringDelimiter = '\0';
-				this.enableState(this.STRING_END);
-				this.disableState(this.IN_STRING);
-			}
+		this.parseString(c);
 
-			if (this.compareState(this.IN_STRING)) {
-				this.currentString = this.currentString.concat(String.valueOf(c));
-				if (this.compareState(this.ESCAPED_CHAR)) {
-					this.disableState(this.ESCAPED_CHAR);
-				}
-			}
-			else if (this.compareState(this.STRING_START)) {
-				this.disableState(this.STRING_START);
-				this.enableState(this.IN_STRING);
-			}
-			else if (this.compareState(this.STRING_END)) {
-				this.disableState(this.STRING_END);
-			}
+		if (this.inString()) {
+			return;
 		}
 	}
 
@@ -139,6 +114,47 @@ class Parser
 		}
 		else if (c == '\n' && this.compareState(this.IN_INLINE_COMMENT)) {
 			this.disableState(this.IN_INLINE_COMMENT);
+		}
+	}
+
+	protected void parseString(final char c)
+	{
+		if (c == '\\' && !this.compareState(this.ESCAPED_CHAR)) {
+			this.enableState(this.ESCAPED_CHAR);
+		}
+		else {
+			if ((c == '"' || c == '\'') && !this.compareState(this.IN_STRING)) {
+				this.currentStringDelimiter = c;
+				this.enableState(this.STRING_START);
+				this.currentStringStartIndex = this.currentCharIndex;
+				this.currentString = "";
+			}
+			else if (
+				(c == '"' || c == '\'') &&
+				this.compareState(this.IN_STRING) && !this.compareState(this.ESCAPED_CHAR)
+				&& c == this.currentStringDelimiter
+			) {
+				Integer stringOccurences = this.strings.get(this.currentString);
+				stringOccurences = stringOccurences != null ? stringOccurences: 0;
+				this.strings.put(this.currentString, stringOccurences + 1);
+				this.currentStringDelimiter = '\0';
+				this.enableState(this.STRING_END);
+				this.disableState(this.IN_STRING);
+			}
+
+			if (this.compareState(this.IN_STRING)) {
+				this.currentString = this.currentString.concat(String.valueOf(c));
+				if (this.compareState(this.ESCAPED_CHAR)) {
+					this.disableState(this.ESCAPED_CHAR);
+				}
+			}
+			else if (this.compareState(this.STRING_START)) {
+				this.disableState(this.STRING_START);
+				this.enableState(this.IN_STRING);
+			}
+			else if (this.compareState(this.STRING_END)) {
+				this.disableState(this.STRING_END);
+			}
 		}
 	}
 
