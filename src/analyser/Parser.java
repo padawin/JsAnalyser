@@ -15,6 +15,7 @@ class Parser
 	protected final int IN_INLINE_COMMENT = 6;
 	protected final int IN_BLOCK_COMMENT = 7;
 	protected final int IN_NUMERIC = 8;
+	protected final int IN_TOKEN = 9;
 
 	protected char currentStringDelimiter;
 	protected String currentString;
@@ -94,6 +95,8 @@ class Parser
 		if (this.compareState(this.IN_NUMERIC)) {
 			return;
 		}
+
+		this.parseToken(c);
 
 		if (c == '{') {
 			this.currentScopeLevel++;
@@ -203,6 +206,25 @@ class Parser
 		}
 	}
 
+	protected void parseToken(final char c)
+	{
+		// replace with regexp
+		// add digits
+		if (Pattern.matches("[_a-zA-Z0-9]", String.valueOf(c))) {
+			if (!this.compareState(this.IN_TOKEN)) {
+			this.currentToken = "";
+				this.enableState(this.IN_TOKEN);
+			}
+			this.currentToken = this.currentToken.concat(String.valueOf(c));
+		}
+		else if (this.compareState(this.IN_TOKEN)) {
+			this.disableState(this.IN_TOKEN);
+			Integer tokenOccurences = this.tokens.get(this.currentToken);
+			tokenOccurences = tokenOccurences != null ? tokenOccurences: 0;
+			this.tokens.put(this.currentToken, tokenOccurences + 1);
+		}
+	}
+
 	public void endParsing()
 	{
 		this.parsing = false;
@@ -214,6 +236,7 @@ class Parser
 		this.currentCharIndex = this.state = 0;
 		this.strings = new HashMap<String, Integer>();
 		this.numerics = new HashMap<String, Integer>();
+		this.tokens = new HashMap<String, Integer>();
 	}
 
 	public void printReport()
