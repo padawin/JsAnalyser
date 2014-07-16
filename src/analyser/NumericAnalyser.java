@@ -29,7 +29,7 @@ public class NumericAnalyser
 			for (String currentNumeric : list) {
 				int strLength = currentNumeric.length(),
 					nbOccurences = this.numerics.get(currentNumeric),
-					relationLenOccurences = (strLength + 1) * nbOccurences - strLength;
+					relationLenOccurences = strLength * nbOccurences - strLength - nbOccurences;
 
 				System.out.println(currentNumeric + ": " + nbOccurences + " occurence(s)");
 
