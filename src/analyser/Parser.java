@@ -110,6 +110,9 @@ class Parser
 		else if (this.compareState(this.MAYBE_END_BLOCK_COMMENT)) {
 			this.disableState(this.MAYBE_END_BLOCK_COMMENT);
 		}
+		else if (this.compareState(this.MAYBE_START_COMMENT)) {
+			this.disableState(this.MAYBE_START_COMMENT);
+		}
 
 		if (c == '*') {
 			if (this.compareState(this.MAYBE_START_COMMENT)) {
