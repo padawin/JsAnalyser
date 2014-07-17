@@ -1,0 +1,1 @@
+function foo(a){console.log("Maj'om");var e="foo",b="foo",d="some longer string",c="some longer string";console.log(e,b,d,c);return 10};
