@@ -1,4 +1,4 @@
-package analyser;
+package jsanalyser;
 
 import java.io.BufferedReader;
 import java.io.IOException;

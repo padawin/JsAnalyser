@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd bin
-java analyser.AnalyserApp
+java jsanalyser.AnalyserApp
