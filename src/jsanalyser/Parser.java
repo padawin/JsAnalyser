@@ -113,16 +113,19 @@ class Parser
 	protected void parseComments(final char c)
 	{
 		if (c == '/') {
+			// First /, means maybe the beginning of a comment
 			if (!this.compareState(this.IN_INLINE_COMMENT)
 				&& !this.compareState(this.IN_BLOCK_COMMENT)
 				&& !this.compareState(this.MAYBE_START_COMMENT)
 			) {
 				this.enableState(this.MAYBE_START_COMMENT);
 			}
+			// second successive slash => inline comment
 			else if (this.compareState(this.MAYBE_START_COMMENT)) {
 				this.disableState(this.MAYBE_START_COMMENT);
 				this.enableState(this.IN_INLINE_COMMENT);
 			}
+			// previous one was a *, se it's the end of a block comment
 			else if (this.compareState(this.MAYBE_END_BLOCK_COMMENT)) {
 				this.disableState(this.MAYBE_END_BLOCK_COMMENT);
 				this.disableState(this.IN_BLOCK_COMMENT);
