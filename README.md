@@ -24,6 +24,7 @@ function foo(arg) {
 	console.log(test, test1, longVar1, longVar2);
 	return 10;
 }
+
 ```
 
 sample-min.js file (minimised with YUI compressor):
@@ -87,6 +88,7 @@ the duplicated string in a variable and use the variable instead of the string:
         console.log(test, test1, longVar1, longVar2);
         return 10;
  }
+
 ```
 
 Which creates the following minimised version:
