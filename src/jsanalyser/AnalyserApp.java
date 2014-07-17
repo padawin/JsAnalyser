@@ -1,10 +1,10 @@
-package analyser;
+package jsanalyser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class Analyser
+public class AnalyserApp
 {
 	public static void main(String[] argv)
 	{
