@@ -73,11 +73,9 @@ has been found twice and can be optimised. An according change could be to store
 the duplicated string in a variable and use the variable instead of the string:
 
 ```
-diff --git a/sample.js b/sample.js
-index ded3698..0c95107 100644
---- a/sample.js
-+++ b/sample.js
-@@ -2,8 +2,9 @@ function foo(arg) {
+--- sample.js   2014-07-17 10:53:29.665576323 +0100
++++ sample-optimised.js 2014-07-17 10:53:21.981579149 +0100
+@@ -2,8 +2,9 @@
         console.log('Maj\'om');
         var test = "foo",
                 test1 = "foo",
@@ -100,7 +98,7 @@ function foo(a){console.log("Maj'om");var f="foo",b="foo",e="some longer string"
 And here is the analyser report then:
 
 ```
-> cat sample-min.js | ./run
+> cat sample-optimised-min.js | ./run
 Report
 
 Strings:
