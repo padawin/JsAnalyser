@@ -4,10 +4,9 @@ import java.util.Map;
 
 public class StringAnalyser extends Analyser
 {
-	public StringAnalyser(Map<String, Integer> elements)
+	public StringAnalyser()
 	{
 		super();
-		this.elements = elements;
 		this.reportTitle = "Strings:";
 	}
 }
