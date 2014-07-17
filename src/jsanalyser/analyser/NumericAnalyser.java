@@ -1,4 +1,4 @@
-package jsanalyser;
+package jsanalyser.analyser;
 
 import java.util.Map;
 import java.util.List;

@@ -4,6 +4,10 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
+import jsanalyser.analyser.StringAnalyser;
+import jsanalyser.analyser.TokenAnalyser;
+import jsanalyser.analyser.NumericAnalyser;
+
 class Parser
 {
 	protected final int IN_STRING = 0;
