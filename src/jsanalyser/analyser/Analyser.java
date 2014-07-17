@@ -51,6 +51,12 @@ public abstract class Analyser
 				nbOccurences = this.elements.get(currentElement);
 
 			System.out.println(currentElement + ": " + nbOccurences + " occurence(s)");
+
+			this.specificReport(verbose, currentElement, nbOccurences);
 		}
+	}
+
+	public void specificReport(boolean verbose, String element, Integer nbOccurences)
+	{
 	}
 }
