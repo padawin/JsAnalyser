@@ -155,6 +155,7 @@ class Parser
 				if (c != '*' && c != '/') {
 					this.currentRegex = "/";
 					this.enableState(this.IN_REGEX);
+					this.disableState(this.MAYBE_START_COMMENT);
 				}
 			}
 			else if (this.compareState(this.IN_REGEX)) {
@@ -198,6 +199,7 @@ class Parser
 			// second successive slash => inline comment
 			else if (this.compareState(this.MAYBE_START_COMMENT)) {
 				this.disableState(this.MAYBE_START_COMMENT);
+				this.disableState(this.MAYBE_IN_REGEX);
 				this.enableState(this.IN_INLINE_COMMENT);
 			}
 			// previous one was a *, so it's the end of a block comment
@@ -217,6 +219,7 @@ class Parser
 		if (c == '*') {
 			if (this.compareState(this.MAYBE_START_COMMENT)) {
 				this.disableState(this.MAYBE_START_COMMENT);
+				this.disableState(this.MAYBE_IN_REGEX);
 				this.enableState(this.IN_BLOCK_COMMENT);
 			}
 			else if (this.compareState(this.IN_BLOCK_COMMENT)) {
