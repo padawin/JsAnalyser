@@ -29,7 +29,6 @@ class Parser
 
 	protected char currentStringDelimiter;
 	protected String currentString;
-	protected int currentStringStartIndex;
 	protected StringAnalyser strings;
 
 	protected String currentNumeric;
@@ -267,7 +266,6 @@ class Parser
 		if ((c == '"' || c == '\'') && !this.compareState(this.IN_STRING)) {
 			this.currentStringDelimiter = c;
 			this.enableState(this.STRING_START);
-			this.currentStringStartIndex = this.currentCharIndex;
 			this.currentString = "";
 		}
 		else if (
