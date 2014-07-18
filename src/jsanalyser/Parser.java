@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import jsanalyser.analyser.StringAnalyser;
+import jsanalyser.analyser.RegexAnalyser;
 import jsanalyser.analyser.TokenAnalyser;
 import jsanalyser.analyser.NumericAnalyser;
 
@@ -32,6 +33,9 @@ class Parser
 
 	protected String currentNumeric;
 	protected NumericAnalyser numerics;
+
+	protected RegexAnalyser regexes;
+	protected String currentRegex;
 
 	protected boolean parsing = false;
 	protected int currentCharIndex = -1;
@@ -146,6 +150,7 @@ class Parser
 			else if (this.compareState(this.MAYBE_IN_REGEX)) {
 				this.disableState(this.MAYBE_IN_REGEX);
 				if (c != '*' && c != '/') {
+					this.currentRegex = "/";
 					this.enableState(this.IN_REGEX);
 				}
 			}
@@ -159,12 +164,17 @@ class Parser
 				this.compareState(this.IN_REGEX_END)
 				&& !Pattern.matches("[a-zA-Z]", sC)
 			) {
+				this.regexes.incElementOccurences(this.currentRegex);
 				this.disableState(this.IN_REGEX_END);
 			}
 
 			if (this.compareState(this.ESCAPED_CHAR)) {
 				this.disableState(this.ESCAPED_CHAR);
 			}
+		}
+
+		if (this.inRegex()) {
+			this.currentRegex = this.currentRegex.concat(sC);
 		}
 	}
 
@@ -296,6 +306,7 @@ class Parser
 	protected void reset()
 	{
 		this.currentCharIndex = this.state = 0;
+		this.regexes = new RegexAnalyser();
 		this.strings = new StringAnalyser();
 		this.numerics = new NumericAnalyser();
 		this.tokens = new TokenAnalyser();
@@ -304,6 +315,7 @@ class Parser
 	public void printReport()
 	{
 		System.out.println("Report");
+		this.regexes.run(true);
 		this.strings.run(true);
 		this.numerics.run(true);
 		this.tokens.run(true);
