@@ -176,37 +176,36 @@ class Parser
 		if (c == '\\' && !this.compareState(this.ESCAPED_CHAR)) {
 			this.enableState(this.ESCAPED_CHAR);
 		}
-		else {
-			if ((c == '"' || c == '\'') && !this.compareState(this.IN_STRING)) {
-				this.currentStringDelimiter = c;
-				this.enableState(this.STRING_START);
-				this.currentStringStartIndex = this.currentCharIndex;
-				this.currentString = "";
-			}
-			else if (
-				(c == '"' || c == '\'') &&
-				this.compareState(this.IN_STRING) && !this.compareState(this.ESCAPED_CHAR)
-				&& c == this.currentStringDelimiter
-			) {
-				this.strings.incElementOccurences(this.currentString);
-				this.currentStringDelimiter = '\0';
-				this.enableState(this.STRING_END);
-				this.disableState(this.IN_STRING);
-			}
 
-			if (this.compareState(this.IN_STRING)) {
-				this.currentString = this.currentString.concat(String.valueOf(c));
-				if (this.compareState(this.ESCAPED_CHAR)) {
-					this.disableState(this.ESCAPED_CHAR);
-				}
+		if ((c == '"' || c == '\'') && !this.compareState(this.IN_STRING)) {
+			this.currentStringDelimiter = c;
+			this.enableState(this.STRING_START);
+			this.currentStringStartIndex = this.currentCharIndex;
+			this.currentString = "";
+		}
+		else if (
+			(c == '"' || c == '\'') &&
+			this.compareState(this.IN_STRING) && !this.compareState(this.ESCAPED_CHAR)
+			&& c == this.currentStringDelimiter
+		) {
+			this.strings.incElementOccurences(this.currentString);
+			this.currentStringDelimiter = '\0';
+			this.enableState(this.STRING_END);
+			this.disableState(this.IN_STRING);
+		}
+
+		if (this.compareState(this.IN_STRING)) {
+			this.currentString = this.currentString.concat(String.valueOf(c));
+			if (this.compareState(this.ESCAPED_CHAR)) {
+				this.disableState(this.ESCAPED_CHAR);
 			}
-			else if (this.compareState(this.STRING_START)) {
-				this.disableState(this.STRING_START);
-				this.enableState(this.IN_STRING);
-			}
-			else if (this.compareState(this.STRING_END)) {
-				this.disableState(this.STRING_END);
-			}
+		}
+		else if (this.compareState(this.STRING_START)) {
+			this.disableState(this.STRING_START);
+			this.enableState(this.IN_STRING);
+		}
+		else if (this.compareState(this.STRING_END)) {
+			this.disableState(this.STRING_END);
 		}
 	}
 
