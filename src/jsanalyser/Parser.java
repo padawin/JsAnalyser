@@ -144,6 +144,7 @@ class Parser
 				!this.inRegex()
 				&& !this.compareState(this.IN_NUMERIC)
 				&& !this.compareState(this.IN_TOKEN)
+				&& !this.compareState(this.END_PARENTHESIS)
 				&& !this.inComment()
 				&& c == '/'
 			) {
