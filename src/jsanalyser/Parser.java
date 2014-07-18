@@ -124,7 +124,7 @@ class Parser
 				this.disableState(this.MAYBE_START_COMMENT);
 				this.enableState(this.IN_INLINE_COMMENT);
 			}
-			// previous one was a *, se it's the end of a block comment
+			// previous one was a *, so it's the end of a block comment
 			else if (this.compareState(this.MAYBE_END_BLOCK_COMMENT)) {
 				this.disableState(this.MAYBE_END_BLOCK_COMMENT);
 				this.disableState(this.IN_BLOCK_COMMENT);
@@ -212,8 +212,6 @@ class Parser
 
 	protected void parseToken(final char c)
 	{
-		// replace with regexp
-		// add digits
 		if (Pattern.matches("[_a-zA-Z0-9]", String.valueOf(c))) {
 			if (!this.compareState(this.IN_TOKEN)) {
 			this.currentToken = "";
