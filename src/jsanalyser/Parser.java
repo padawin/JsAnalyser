@@ -25,6 +25,7 @@ class Parser
 	protected final int MAYBE_IN_REGEX = 11;
 	protected final int IN_REGEX = 12;
 	protected final int IN_REGEX_END = 13;
+	protected final int END_PARENTHESIS = 14;
 
 	protected char currentStringDelimiter;
 	protected String currentString;
@@ -118,6 +119,12 @@ class Parser
 		}
 		else if (c == '}') {
 			this.currentScopeLevel--;
+		}
+		else if (c == ')') {
+			this.enableState(this.END_PARENTHESIS);
+		}
+		else if (this.compareState(this.END_PARENTHESIS)) {
+			this.disableState(this.END_PARENTHESIS);
 		}
 	}
 
