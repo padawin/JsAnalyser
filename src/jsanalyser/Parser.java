@@ -212,7 +212,7 @@ class Parser
 
 	protected void parseToken(final char c)
 	{
-		if (Pattern.matches("[_a-zA-Z0-9]", String.valueOf(c))) {
+		if (Pattern.matches("[$_a-zA-Z0-9]", String.valueOf(c))) {
 			if (!this.compareState(this.IN_TOKEN)) {
 			this.currentToken = "";
 				this.enableState(this.IN_TOKEN);
