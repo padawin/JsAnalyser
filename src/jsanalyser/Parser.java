@@ -24,11 +24,10 @@ class Parser
 	protected char currentStringDelimiter;
 	protected String currentString;
 	protected int currentStringStartIndex;
+	protected StringAnalyser strings;
 
 	protected String currentNumeric;
 	protected NumericAnalyser numerics;
-
-	protected StringAnalyser strings;
 
 	protected boolean parsing = false;
 	protected int currentCharIndex = -1;
@@ -125,7 +124,7 @@ class Parser
 				this.disableState(this.MAYBE_START_COMMENT);
 				this.enableState(this.IN_INLINE_COMMENT);
 			}
-			// previous one was a *, se it's the end of a block comment
+			// previous one was a *, so it's the end of a block comment
 			else if (this.compareState(this.MAYBE_END_BLOCK_COMMENT)) {
 				this.disableState(this.MAYBE_END_BLOCK_COMMENT);
 				this.disableState(this.IN_BLOCK_COMMENT);
@@ -177,45 +176,42 @@ class Parser
 		if (c == '\\' && !this.compareState(this.ESCAPED_CHAR)) {
 			this.enableState(this.ESCAPED_CHAR);
 		}
-		else {
-			if ((c == '"' || c == '\'') && !this.compareState(this.IN_STRING)) {
-				this.currentStringDelimiter = c;
-				this.enableState(this.STRING_START);
-				this.currentStringStartIndex = this.currentCharIndex;
-				this.currentString = "";
-			}
-			else if (
-				(c == '"' || c == '\'') &&
-				this.compareState(this.IN_STRING) && !this.compareState(this.ESCAPED_CHAR)
-				&& c == this.currentStringDelimiter
-			) {
-				this.strings.incElementOccurences(this.currentString);
-				this.currentStringDelimiter = '\0';
-				this.enableState(this.STRING_END);
-				this.disableState(this.IN_STRING);
-			}
 
-			if (this.compareState(this.IN_STRING)) {
-				this.currentString = this.currentString.concat(String.valueOf(c));
-				if (this.compareState(this.ESCAPED_CHAR)) {
-					this.disableState(this.ESCAPED_CHAR);
-				}
+		if ((c == '"' || c == '\'') && !this.compareState(this.IN_STRING)) {
+			this.currentStringDelimiter = c;
+			this.enableState(this.STRING_START);
+			this.currentStringStartIndex = this.currentCharIndex;
+			this.currentString = "";
+		}
+		else if (
+			(c == '"' || c == '\'') &&
+			this.compareState(this.IN_STRING) && !this.compareState(this.ESCAPED_CHAR)
+			&& c == this.currentStringDelimiter
+		) {
+			this.strings.incElementOccurences(this.currentString);
+			this.currentStringDelimiter = '\0';
+			this.enableState(this.STRING_END);
+			this.disableState(this.IN_STRING);
+		}
+
+		if (this.compareState(this.IN_STRING)) {
+			this.currentString = this.currentString.concat(String.valueOf(c));
+			if (this.compareState(this.ESCAPED_CHAR)) {
+				this.disableState(this.ESCAPED_CHAR);
 			}
-			else if (this.compareState(this.STRING_START)) {
-				this.disableState(this.STRING_START);
-				this.enableState(this.IN_STRING);
-			}
-			else if (this.compareState(this.STRING_END)) {
-				this.disableState(this.STRING_END);
-			}
+		}
+		else if (this.compareState(this.STRING_START)) {
+			this.disableState(this.STRING_START);
+			this.enableState(this.IN_STRING);
+		}
+		else if (this.compareState(this.STRING_END)) {
+			this.disableState(this.STRING_END);
 		}
 	}
 
 	protected void parseToken(final char c)
 	{
-		// replace with regexp
-		// add digits
-		if (Pattern.matches("[_a-zA-Z0-9]", String.valueOf(c))) {
+		if (Pattern.matches("[$_a-zA-Z0-9]", String.valueOf(c))) {
 			if (!this.compareState(this.IN_TOKEN)) {
 			this.currentToken = "";
 				this.enableState(this.IN_TOKEN);
