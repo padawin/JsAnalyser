@@ -21,6 +21,9 @@ class Parser
 	protected final int END_BLOCK_COMMENT = 8;
 	protected final int IN_NUMERIC = 9;
 	protected final int IN_TOKEN = 10;
+	protected final int MAYBE_IN_REGEX = 11;
+	protected final int IN_REGEX = 12;
+	protected final int IN_REGEX_END = 13;
 
 	protected char currentStringDelimiter;
 	protected String currentString;
@@ -60,6 +63,12 @@ class Parser
 			|| this.compareState(this.END_BLOCK_COMMENT);
 	}
 
+	protected boolean inRegex()
+	{
+		return this.compareState(this.IN_REGEX)
+			|| this.compareState(this.IN_REGEX_END);
+	}
+
 	protected boolean inString()
 	{
 		return this.compareState(this.STRING_START)
@@ -86,7 +95,9 @@ class Parser
 	{
 		this.parseComments(c);
 
-		if (this.inComment()) {
+		this.parseRegex(c);
+
+		if (this.inComment() || this.inRegex()) {
 			return;
 		}
 
@@ -109,6 +120,51 @@ class Parser
 		}
 		else if (c == '}') {
 			this.currentScopeLevel--;
+		}
+	}
+
+	protected void parseRegex(final char c)
+	{
+		if (this.inString()) {
+			return;
+		}
+		String sC = String.valueOf(c);
+		if (c == '\\' && !this.compareState(this.ESCAPED_CHAR)) {
+			this.enableState(this.ESCAPED_CHAR);
+		}
+		else {
+			// Entering regex
+			if (
+				!this.inRegex()
+				&& !this.compareState(this.IN_NUMERIC)
+				&& !this.compareState(this.IN_TOKEN)
+				&& !this.inComment()
+				&& c == '/'
+			) {
+				this.enableState(this.MAYBE_IN_REGEX);
+			}
+			else if (this.compareState(this.MAYBE_IN_REGEX)) {
+				this.disableState(this.MAYBE_IN_REGEX);
+				if (c != '*' && c != '/') {
+					this.enableState(this.IN_REGEX);
+				}
+			}
+			else if (this.compareState(this.IN_REGEX)) {
+				if (c == '/' && !this.compareState(this.ESCAPED_CHAR)) {
+					this.disableState(this.IN_REGEX);
+					this.enableState(this.IN_REGEX_END);
+				}
+			}
+			else if (
+				this.compareState(this.IN_REGEX_END)
+				&& !Pattern.matches("[a-zA-Z]", sC)
+			) {
+				this.disableState(this.IN_REGEX_END);
+			}
+
+			if (this.compareState(this.ESCAPED_CHAR)) {
+				this.disableState(this.ESCAPED_CHAR);
+			}
 		}
 	}
 
