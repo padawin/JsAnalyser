@@ -18,8 +18,9 @@ class Parser
 	protected final int MAYBE_END_BLOCK_COMMENT = 5;
 	protected final int IN_INLINE_COMMENT = 6;
 	protected final int IN_BLOCK_COMMENT = 7;
-	protected final int IN_NUMERIC = 8;
-	protected final int IN_TOKEN = 9;
+	protected final int END_BLOCK_COMMENT = 8;
+	protected final int IN_NUMERIC = 9;
+	protected final int IN_TOKEN = 10;
 
 	protected char currentStringDelimiter;
 	protected String currentString;
@@ -54,7 +55,9 @@ class Parser
 
 	protected boolean inComment()
 	{
-		return this.compareState(this.IN_BLOCK_COMMENT) || this.compareState(this.IN_INLINE_COMMENT);
+		return this.compareState(this.IN_BLOCK_COMMENT)
+			|| this.compareState(this.IN_INLINE_COMMENT)
+			|| this.compareState(this.END_BLOCK_COMMENT);
 	}
 
 	protected boolean inString()
@@ -128,10 +131,14 @@ class Parser
 			else if (this.compareState(this.MAYBE_END_BLOCK_COMMENT)) {
 				this.disableState(this.MAYBE_END_BLOCK_COMMENT);
 				this.disableState(this.IN_BLOCK_COMMENT);
+				this.enableState(this.END_BLOCK_COMMENT);
 			}
 		}
 		else if (this.compareState(this.MAYBE_END_BLOCK_COMMENT)) {
 			this.disableState(this.MAYBE_END_BLOCK_COMMENT);
+		}
+		else if (this.compareState(this.END_BLOCK_COMMENT)) {
+			this.disableState(this.END_BLOCK_COMMENT);
 		}
 
 		if (c == '*') {
