@@ -98,16 +98,10 @@ class Parser
 	protected void parseChar(final char c)
 	{
 		this.parseComments(c);
-
 		this.parseRegex(c);
-
-		if (this.inComment() || this.inRegex()) {
-			return;
-		}
-
 		this.parseString(c);
 
-		if (this.inString()) {
+		if (this.inComment() || this.inRegex() || this.inString()) {
 			return;
 		}
 
@@ -129,9 +123,10 @@ class Parser
 
 	protected void parseRegex(final char c)
 	{
-		if (this.inString()) {
+		if (this.inString() || this.inComment()) {
 			return;
 		}
+
 		String sC = String.valueOf(c);
 		if (c == '\\' && !this.compareState(this.ESCAPED_CHAR)) {
 			this.enableState(this.ESCAPED_CHAR);
@@ -180,6 +175,10 @@ class Parser
 
 	protected void parseComments(final char c)
 	{
+		if (this.inRegex() || this.inString()) {
+			return;
+		}
+
 		if (c == '/') {
 			// First /, means maybe the beginning of a comment
 			if (!this.compareState(this.IN_INLINE_COMMENT)
@@ -246,6 +245,10 @@ class Parser
 
 	protected void parseString(final char c)
 	{
+		if (this.inRegex() || this.inComment()) {
+			return;
+		}
+
 		if (c == '\\' && !this.compareState(this.ESCAPED_CHAR)) {
 			this.enableState(this.ESCAPED_CHAR);
 		}
