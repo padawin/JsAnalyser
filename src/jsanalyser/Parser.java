@@ -134,9 +134,6 @@ class Parser
 		else if (this.compareState(this.MAYBE_END_BLOCK_COMMENT)) {
 			this.disableState(this.MAYBE_END_BLOCK_COMMENT);
 		}
-		else if (this.compareState(this.MAYBE_START_COMMENT)) {
-			this.disableState(this.MAYBE_START_COMMENT);
-		}
 
 		if (c == '*') {
 			if (this.compareState(this.MAYBE_START_COMMENT)) {
@@ -147,8 +144,13 @@ class Parser
 				this.enableState(this.MAYBE_END_BLOCK_COMMENT);
 			}
 		}
-		else if (c == '\n' && this.compareState(this.IN_INLINE_COMMENT)) {
-			this.disableState(this.IN_INLINE_COMMENT);
+		else {
+			if (c != '/' && this.compareState(this.MAYBE_START_COMMENT)) {
+				this.disableState(this.MAYBE_START_COMMENT);
+			}
+			if (c == '\n' && this.compareState(this.IN_INLINE_COMMENT)) {
+				this.disableState(this.IN_INLINE_COMMENT);
+			}
 		}
 	}
 
