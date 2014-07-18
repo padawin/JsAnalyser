@@ -24,11 +24,10 @@ class Parser
 	protected char currentStringDelimiter;
 	protected String currentString;
 	protected int currentStringStartIndex;
+	protected StringAnalyser strings;
 
 	protected String currentNumeric;
 	protected NumericAnalyser numerics;
-
-	protected StringAnalyser strings;
 
 	protected boolean parsing = false;
 	protected int currentCharIndex = -1;
