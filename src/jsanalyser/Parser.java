@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import jsanalyser.analyser.StringAnalyser;
+import jsanalyser.analyser.RegexAnalyser;
 import jsanalyser.analyser.TokenAnalyser;
 import jsanalyser.analyser.NumericAnalyser;
 
@@ -18,16 +19,23 @@ class Parser
 	protected final int MAYBE_END_BLOCK_COMMENT = 5;
 	protected final int IN_INLINE_COMMENT = 6;
 	protected final int IN_BLOCK_COMMENT = 7;
-	protected final int IN_NUMERIC = 8;
-	protected final int IN_TOKEN = 9;
+	protected final int END_BLOCK_COMMENT = 8;
+	protected final int IN_NUMERIC = 9;
+	protected final int IN_TOKEN = 10;
+	protected final int MAYBE_IN_REGEX = 11;
+	protected final int IN_REGEX = 12;
+	protected final int IN_REGEX_END = 13;
+	protected final int END_PARENTHESIS = 14;
 
 	protected char currentStringDelimiter;
 	protected String currentString;
-	protected int currentStringStartIndex;
 	protected StringAnalyser strings;
 
 	protected String currentNumeric;
 	protected NumericAnalyser numerics;
+
+	protected RegexAnalyser regexes;
+	protected String currentRegex;
 
 	protected boolean parsing = false;
 	protected int currentCharIndex = -1;
@@ -54,7 +62,15 @@ class Parser
 
 	protected boolean inComment()
 	{
-		return this.compareState(this.IN_BLOCK_COMMENT) || this.compareState(this.IN_INLINE_COMMENT);
+		return this.compareState(this.IN_BLOCK_COMMENT)
+			|| this.compareState(this.IN_INLINE_COMMENT)
+			|| this.compareState(this.END_BLOCK_COMMENT);
+	}
+
+	protected boolean inRegex()
+	{
+		return this.compareState(this.IN_REGEX)
+			|| this.compareState(this.IN_REGEX_END);
 	}
 
 	protected boolean inString()
@@ -82,14 +98,10 @@ class Parser
 	protected void parseChar(final char c)
 	{
 		this.parseComments(c);
-
-		if (this.inComment()) {
-			return;
-		}
-
+		this.parseRegex(c);
 		this.parseString(c);
 
-		if (this.inString()) {
+		if (this.inComment() || this.inRegex() || this.inString()) {
 			return;
 		}
 
@@ -107,10 +119,74 @@ class Parser
 		else if (c == '}') {
 			this.currentScopeLevel--;
 		}
+		else if (c == ')') {
+			this.enableState(this.END_PARENTHESIS);
+		}
+		else if (this.compareState(this.END_PARENTHESIS)) {
+			this.disableState(this.END_PARENTHESIS);
+		}
+	}
+
+	protected void parseRegex(final char c)
+	{
+		if (this.inString() || this.inComment()) {
+			return;
+		}
+
+		String sC = String.valueOf(c);
+		if (c == '\\' && !this.compareState(this.ESCAPED_CHAR)) {
+			this.enableState(this.ESCAPED_CHAR);
+		}
+		else {
+			// Entering regex
+			if (
+				!this.inRegex()
+				&& !this.compareState(this.IN_NUMERIC)
+				&& !this.compareState(this.IN_TOKEN)
+				&& !this.compareState(this.END_PARENTHESIS)
+				&& !this.inComment()
+				&& c == '/'
+			) {
+				this.enableState(this.MAYBE_IN_REGEX);
+			}
+			else if (this.compareState(this.MAYBE_IN_REGEX)) {
+				this.disableState(this.MAYBE_IN_REGEX);
+				if (c != '*' && c != '/') {
+					this.currentRegex = "/";
+					this.enableState(this.IN_REGEX);
+					this.disableState(this.MAYBE_START_COMMENT);
+				}
+			}
+			else if (this.compareState(this.IN_REGEX)) {
+				if (c == '/' && !this.compareState(this.ESCAPED_CHAR)) {
+					this.disableState(this.IN_REGEX);
+					this.enableState(this.IN_REGEX_END);
+				}
+			}
+			else if (
+				this.compareState(this.IN_REGEX_END)
+				&& !Pattern.matches("[a-zA-Z]", sC)
+			) {
+				this.regexes.incElementOccurences(this.currentRegex);
+				this.disableState(this.IN_REGEX_END);
+			}
+
+			if (this.compareState(this.ESCAPED_CHAR)) {
+				this.disableState(this.ESCAPED_CHAR);
+			}
+		}
+
+		if (this.inRegex()) {
+			this.currentRegex = this.currentRegex.concat(sC);
+		}
 	}
 
 	protected void parseComments(final char c)
 	{
+		if (this.inRegex() || this.inString()) {
+			return;
+		}
+
 		if (c == '/') {
 			// First /, means maybe the beginning of a comment
 			if (!this.compareState(this.IN_INLINE_COMMENT)
@@ -122,21 +198,27 @@ class Parser
 			// second successive slash => inline comment
 			else if (this.compareState(this.MAYBE_START_COMMENT)) {
 				this.disableState(this.MAYBE_START_COMMENT);
+				this.disableState(this.MAYBE_IN_REGEX);
 				this.enableState(this.IN_INLINE_COMMENT);
 			}
 			// previous one was a *, so it's the end of a block comment
 			else if (this.compareState(this.MAYBE_END_BLOCK_COMMENT)) {
 				this.disableState(this.MAYBE_END_BLOCK_COMMENT);
 				this.disableState(this.IN_BLOCK_COMMENT);
+				this.enableState(this.END_BLOCK_COMMENT);
 			}
 		}
 		else if (this.compareState(this.MAYBE_END_BLOCK_COMMENT)) {
 			this.disableState(this.MAYBE_END_BLOCK_COMMENT);
 		}
+		else if (this.compareState(this.END_BLOCK_COMMENT)) {
+			this.disableState(this.END_BLOCK_COMMENT);
+		}
 
 		if (c == '*') {
 			if (this.compareState(this.MAYBE_START_COMMENT)) {
 				this.disableState(this.MAYBE_START_COMMENT);
+				this.disableState(this.MAYBE_IN_REGEX);
 				this.enableState(this.IN_BLOCK_COMMENT);
 			}
 			else if (this.compareState(this.IN_BLOCK_COMMENT)) {
@@ -173,6 +255,10 @@ class Parser
 
 	protected void parseString(final char c)
 	{
+		if (this.inRegex() || this.inComment()) {
+			return;
+		}
+
 		if (c == '\\' && !this.compareState(this.ESCAPED_CHAR)) {
 			this.enableState(this.ESCAPED_CHAR);
 		}
@@ -180,7 +266,6 @@ class Parser
 		if ((c == '"' || c == '\'') && !this.compareState(this.IN_STRING)) {
 			this.currentStringDelimiter = c;
 			this.enableState(this.STRING_START);
-			this.currentStringStartIndex = this.currentCharIndex;
 			this.currentString = "";
 		}
 		else if (
@@ -233,6 +318,7 @@ class Parser
 	protected void reset()
 	{
 		this.currentCharIndex = this.state = 0;
+		this.regexes = new RegexAnalyser();
 		this.strings = new StringAnalyser();
 		this.numerics = new NumericAnalyser();
 		this.tokens = new TokenAnalyser();
@@ -241,6 +327,7 @@ class Parser
 	public void printReport()
 	{
 		System.out.println("Report");
+		this.regexes.run(true);
 		this.strings.run(true);
 		this.numerics.run(true);
 		this.tokens.run(true);
