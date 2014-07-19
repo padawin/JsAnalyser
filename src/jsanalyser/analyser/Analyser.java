@@ -30,10 +30,6 @@ public abstract class Analyser
 		Integer occurences = this.getElementOccurences(key);
 		this.elements.put(key, occurences + 1);
 	}
-	public void run()
-	{
-		this.run(false);
-	}
 
 	public void run(boolean verbose)
 	{
