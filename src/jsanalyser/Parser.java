@@ -40,13 +40,11 @@ class Parser
 	protected TokenAnalyser tokens;
 	protected String currentToken;
 
-	protected boolean parsing = false;
 	protected int currentCharIndex = -1;
 	protected int state = 0;
 
 	public void startParsing()
 	{
-		this.parsing = true;
 		this.reset();
 	}
 
@@ -311,7 +309,6 @@ class Parser
 
 	public void endParsing()
 	{
-		this.parsing = false;
 		this.reset();
 	}
 
