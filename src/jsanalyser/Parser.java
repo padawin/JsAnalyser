@@ -43,6 +43,15 @@ class Parser
 	protected int currentCharIndex = -1;
 	protected int state = 0;
 
+	protected void reset()
+	{
+		this.currentCharIndex = this.state = 0;
+		this.regexes = new RegexAnalyser();
+		this.strings = new StringAnalyser();
+		this.numerics = new NumericAnalyser();
+		this.tokens = new TokenAnalyser();
+	}
+
 	public void parseCodeChunk(String chunk)
 	{
 		int chunkSize = chunk.length(),
@@ -50,41 +59,6 @@ class Parser
 		for (localCurChar = 0; localCurChar < chunkSize; localCurChar++, this.currentCharIndex++) {
 			this.parseChar(chunk.charAt(localCurChar));
 		}
-	}
-
-	protected boolean inComment()
-	{
-		return this.compareState(this.IN_BLOCK_COMMENT)
-			|| this.compareState(this.IN_INLINE_COMMENT)
-			|| this.compareState(this.END_BLOCK_COMMENT);
-	}
-
-	protected boolean inRegex()
-	{
-		return this.compareState(this.IN_REGEX)
-			|| this.compareState(this.IN_REGEX_END);
-	}
-
-	protected boolean inString()
-	{
-		return this.compareState(this.STRING_START)
-			|| this.compareState(this.IN_STRING)
-			|| this.compareState(this.STRING_END);
-	}
-
-	protected boolean compareState(final int flag)
-	{
-		return (1 << flag) == (this.state & (1 << flag));
-	}
-
-	protected void enableState(final int flag)
-	{
-		this.state = this.state | (1 << flag);
-	}
-
-	protected void disableState(final int flag)
-	{
-		this.state = this.state & ~(1 << flag);
 	}
 
 	protected void parseChar(final char c)
@@ -105,18 +79,56 @@ class Parser
 
 		this.parseToken(c);
 
-		if (c == '{') {
-			this.currentScopeLevel++;
-		}
-		else if (c == '}') {
-			this.currentScopeLevel--;
-		}
-		else if (c == ')') {
+		if (c == ')') {
 			this.enableState(this.END_PARENTHESIS);
 		}
 		else if (this.compareState(this.END_PARENTHESIS)) {
 			this.disableState(this.END_PARENTHESIS);
 		}
+	}
+
+	public void printReport()
+	{
+		System.out.println("Report");
+		this.regexes.run(true);
+		this.strings.run(true);
+		this.numerics.run(true);
+		this.tokens.run(true);
+	}
+
+	protected boolean compareState(final int flag)
+	{
+		return (1 << flag) == (this.state & (1 << flag));
+	}
+
+	protected void enableState(final int flag)
+	{
+		this.state = this.state | (1 << flag);
+	}
+
+	protected void disableState(final int flag)
+	{
+		this.state = this.state & ~(1 << flag);
+	}
+
+	protected boolean inComment()
+	{
+		return this.compareState(this.IN_BLOCK_COMMENT)
+			|| this.compareState(this.IN_INLINE_COMMENT)
+			|| this.compareState(this.END_BLOCK_COMMENT);
+	}
+
+	protected boolean inRegex()
+	{
+		return this.compareState(this.IN_REGEX)
+			|| this.compareState(this.IN_REGEX_END);
+	}
+
+	protected boolean inString()
+	{
+		return this.compareState(this.STRING_START)
+			|| this.compareState(this.IN_STRING)
+			|| this.compareState(this.STRING_END);
 	}
 
 	protected void parseRegex(final char c)
@@ -301,23 +313,5 @@ class Parser
 			this.tokens.incElementOccurences(this.currentToken);
 			this.disableState(this.IN_TOKEN);
 		}
-	}
-
-	protected void reset()
-	{
-		this.currentCharIndex = this.state = 0;
-		this.regexes = new RegexAnalyser();
-		this.strings = new StringAnalyser();
-		this.numerics = new NumericAnalyser();
-		this.tokens = new TokenAnalyser();
-	}
-
-	public void printReport()
-	{
-		System.out.println("Report");
-		this.regexes.run(true);
-		this.strings.run(true);
-		this.numerics.run(true);
-		this.tokens.run(true);
 	}
 }
