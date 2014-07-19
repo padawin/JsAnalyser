@@ -221,7 +221,7 @@ class Parser
 			if (c != '/' && this.compareState(this.MAYBE_START_COMMENT)) {
 				this.disableState(this.MAYBE_START_COMMENT);
 			}
-			if (c == '\n' && this.compareState(this.IN_INLINE_COMMENT)) {
+			if ((c == '\n' || c == '\r') && this.compareState(this.IN_INLINE_COMMENT)) {
 				this.disableState(this.IN_INLINE_COMMENT);
 			}
 		}
