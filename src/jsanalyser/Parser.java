@@ -263,20 +263,21 @@ class Parser
 			this.enableState(this.ESCAPED_CHAR);
 		}
 
-		if ((c == '"' || c == '\'') && !this.compareState(this.IN_STRING)) {
-			this.currentStringDelimiter = c;
-			this.enableState(this.STRING_START);
-			this.currentString = "";
-		}
-		else if (
-			(c == '"' || c == '\'') &&
-			this.compareState(this.IN_STRING) && !this.compareState(this.ESCAPED_CHAR)
-			&& c == this.currentStringDelimiter
-		) {
-			this.strings.incElementOccurences(this.currentString);
-			this.currentStringDelimiter = '\0';
-			this.enableState(this.STRING_END);
-			this.disableState(this.IN_STRING);
+		if ((c == '"' || c == '\'')) {
+			if (!this.compareState(this.IN_STRING)) {
+				this.currentStringDelimiter = c;
+				this.enableState(this.STRING_START);
+				this.currentString = "";
+			}
+			else if (
+				this.compareState(this.IN_STRING) && !this.compareState(this.ESCAPED_CHAR)
+				&& c == this.currentStringDelimiter
+			) {
+				this.strings.incElementOccurences(this.currentString);
+				this.currentStringDelimiter = '\0';
+				this.enableState(this.STRING_END);
+				this.disableState(this.IN_STRING);
+			}
 		}
 
 		if (this.compareState(this.IN_STRING)) {
