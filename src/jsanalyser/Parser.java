@@ -27,23 +27,22 @@ class Parser
 	protected final int IN_REGEX_END = 13;
 	protected final int END_PARENTHESIS = 14;
 
-	protected char currentStringDelimiter;
-	protected String currentString;
 	protected StringAnalyser strings;
+	protected String currentString;
+	protected char currentStringDelimiter;
 
-	protected String currentNumeric;
 	protected NumericAnalyser numerics;
+	protected String currentNumeric;
 
 	protected RegexAnalyser regexes;
 	protected String currentRegex;
 
-	protected boolean parsing = false;
-	protected int currentCharIndex = -1;
-	protected int state = -1;
-	protected int currentScopeLevel = 0;
-
 	protected TokenAnalyser tokens;
 	protected String currentToken;
+
+	protected boolean parsing = false;
+	protected int currentCharIndex = -1;
+	protected int state = 0;
 
 	public void startParsing()
 	{
