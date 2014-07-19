@@ -43,11 +43,6 @@ class Parser
 	protected int currentCharIndex = -1;
 	protected int state = 0;
 
-	public void startParsing()
-	{
-		this.reset();
-	}
-
 	public void parseCodeChunk(String chunk)
 	{
 		int chunkSize = chunk.length(),
@@ -305,11 +300,6 @@ class Parser
 			this.tokens.incElementOccurences(this.currentToken);
 			this.disableState(this.IN_TOKEN);
 		}
-	}
-
-	public void endParsing()
-	{
-		this.reset();
 	}
 
 	protected void reset()
