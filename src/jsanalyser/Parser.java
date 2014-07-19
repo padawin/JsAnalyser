@@ -259,10 +259,6 @@ class Parser
 			return;
 		}
 
-		if (c == '\\' && !this.compareState(this.ESCAPED_CHAR)) {
-			this.enableState(this.ESCAPED_CHAR);
-		}
-
 		if ((c == '"' || c == '\'')) {
 			if (!this.compareState(this.IN_STRING)) {
 				this.currentStringDelimiter = c;
@@ -282,7 +278,11 @@ class Parser
 
 		if (this.compareState(this.IN_STRING)) {
 			this.currentString = this.currentString.concat(String.valueOf(c));
-			if (this.compareState(this.ESCAPED_CHAR)) {
+
+			if (c == '\\' && !this.compareState(this.ESCAPED_CHAR)) {
+				this.enableState(this.ESCAPED_CHAR);
+			}
+			else if (this.compareState(this.ESCAPED_CHAR)) {
 				this.disableState(this.ESCAPED_CHAR);
 			}
 		}
