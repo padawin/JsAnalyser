@@ -9,7 +9,7 @@ import jsanalyser.analyser.RegexAnalyser;
 import jsanalyser.analyser.TokenAnalyser;
 import jsanalyser.analyser.NumericAnalyser;
 
-class Parser
+public class Parser
 {
 	protected final int IN_STRING = 0;
 	protected final int ESCAPED_CHAR = 1;
