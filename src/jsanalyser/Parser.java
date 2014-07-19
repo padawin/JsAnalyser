@@ -258,7 +258,8 @@ class Parser
 				this.currentString = "";
 			}
 			else if (
-				this.compareState(this.IN_STRING) && !this.compareState(this.ESCAPED_CHAR)
+				this.compareState(this.IN_STRING)
+				&& !this.compareState(this.ESCAPED_CHAR)
 				&& c == this.currentStringDelimiter
 			) {
 				this.strings.incElementOccurences(this.currentString);
